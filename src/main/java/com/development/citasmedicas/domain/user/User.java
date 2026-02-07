@@ -25,4 +25,20 @@ public class User {
     private Role role;
 
     private boolean enable = true;
+
+    public User(String email, String password){
+        this.email=email;
+        this.password=password;
+        this.role=Role.ROLE_PATIENT;
+    }
+
+    public void updateUser(String email, String password){
+        if(email != null){
+            this.email = email;
+        }
+
+        if(password != null){
+            this. password = password;
+        }
+    }
 }
