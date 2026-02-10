@@ -36,32 +36,32 @@ public class Patient {
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     private List<Appointment> appointments;
 
-    public Patient(String firstName, String lastName,String phoneNumber, LocalDate birthDate, User user){
-        this.firstName=firstName;
-        this.lastName=lastName;
-        this.phoneNumber=phoneNumber;
-        this.birthDate=birthDate;
-        this.user=user;
+    public Patient(String firstName, String lastName, String phoneNumber, LocalDate birthDate, User user) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.birthDate = birthDate;
+        this.user = user;
     }
 
-    public void updatePatient(UpdatePatientDTO dto){
-        if(dto.firstName() != null){
+    public void updatePatient(UpdatePatientDTO dto) {
+        if (dto.firstName() != null) {
             this.firstName = dto.firstName();
         }
 
-        if(dto.lastName() != null){
+        if (dto.lastName() != null) {
             this.lastName = dto.lastName();
         }
 
-        if(dto.phoneNumber() != null){
-            this.phoneNumber=dto.phoneNumber();
+        if (dto.phoneNumber() != null) {
+            this.phoneNumber = dto.phoneNumber();
         }
 
-        if(dto.birthDate()!=null){
+        if (dto.birthDate() != null) {
             this.birthDate = dto.birthDate();
         }
 
-        if(this.user != null){
+        if (this.user != null) {
             user.updateUser(dto.email(), dto.password());
         }
     }

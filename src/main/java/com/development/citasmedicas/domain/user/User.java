@@ -8,8 +8,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@NoArgsConstructor @AllArgsConstructor
-@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,19 +28,19 @@ public class User {
 
     private boolean enable = true;
 
-    public User(String email, String password){
-        this.email=email;
-        this.password=password;
-        this.role=Role.ROLE_PATIENT;
+    public User(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
     }
 
-    public void updateUser(String email, String password){
-        if(email != null){
+    public void updateUser(String email, String password) {
+        if (email != null) {
             this.email = email;
         }
 
-        if(password != null){
-            this. password = password;
+        if (password != null) {
+            this.password = password;
         }
     }
 }

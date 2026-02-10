@@ -11,4 +11,7 @@ public record UpdatePatientDTO(
         String email,
         String password
 ) {
+    public boolean minimalModification() {
+        return firstName != null || lastName != null || phoneNumber != null || birthDate != null || email != null || password != null;
+    }
 }
