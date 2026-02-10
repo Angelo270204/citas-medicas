@@ -1,5 +1,6 @@
 package com.development.citasmedicas.domain.appointment;
 
+import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentDTO;
 import com.development.citasmedicas.domain.doctor.Doctor;
 import com.development.citasmedicas.domain.patient.Patient;
 import jakarta.persistence.*;
@@ -37,4 +38,13 @@ public class Appointment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
+
+    public Appointment(ScheduleAppointmentDTO dto, Doctor doctor, Patient patient){
+        this.startDateTime= dto.startDateTime();
+        this.endDateTime=dto.endDateTime();
+        this.reasonForVisit= dto.reasonForVisit();
+        this.status=AppointmentStatus.PENDING;
+        this.doctor=doctor;
+        this.patient=patient;
+    }
 }

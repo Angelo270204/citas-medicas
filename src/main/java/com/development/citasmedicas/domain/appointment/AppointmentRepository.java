@@ -23,6 +23,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         @Param("endDateTime") LocalDateTime endDateTime
     );
 
+    @Query("""
+        SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
+        FROM Appointment a
+        WHERE a.patient.id = :patientId
+        AND a.status != 'CANCELED'
+        AND (a.startDateTime < :endDateTime AND a.endDateTime > :startDateTime)
+    """)
+    boolean existsPatientConflictingAppointment(
+        @Param("patientId") Long patientId,
+        @Param("startDateTime") LocalDateTime startDateTime,
+        @Param("endDateTime") LocalDateTime endDateTime
+    );
+
     // Para ver el historial de un paciente
     List<Appointment> findByPatientId(Long patientId);
 
