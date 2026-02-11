@@ -7,6 +7,7 @@ import com.development.citasmedicas.domain.patient.dto.PatientResponseDTO;
 import java.time.LocalDateTime;
 
 public record AppointmentResponseDTO(
+        Long id,
         LocalDateTime startDateTime,
         LocalDateTime endDateTime,
         String reasonForVisit,
@@ -15,6 +16,6 @@ public record AppointmentResponseDTO(
         DoctorResponseDTO doctor
 ) {
     public AppointmentResponseDTO(Appointment app){
-        this(app.getStartDateTime(),app.getEndDateTime(),app.getReasonForVisit(),app.getDiagnosis(),new PatientResponseDTO(app.getPatient()),new DoctorResponseDTO(app.getDoctor()));
+        this(app.getId(),app.getStartDateTime(),app.getEndDateTime(),app.getReasonForVisit(),app.getDiagnosis(),new PatientResponseDTO(app.getPatient()),new DoctorResponseDTO(app.getDoctor()));
     }
 }
