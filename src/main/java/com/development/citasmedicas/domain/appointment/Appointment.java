@@ -20,23 +20,28 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "start_date_time", nullable = false)
     private LocalDateTime startDateTime;
 
+    @Column(name = "end_date_time", nullable = false)
     private LocalDateTime endDateTime;
 
+    @Column(name = "reason_for_visit")
     private String reasonForVisit;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private AppointmentStatus status;
 
+    @Column(columnDefinition = "TEXT")
     private String diagnosis;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
     public Appointment(ScheduleAppointmentDTO dto, Doctor doctor, Patient patient){

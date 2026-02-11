@@ -24,8 +24,10 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private boolean enable = true;
 
     public User(String email, String password, Role role) {
