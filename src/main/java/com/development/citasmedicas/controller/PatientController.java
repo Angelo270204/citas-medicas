@@ -7,6 +7,7 @@ import com.development.citasmedicas.domain.patient.dto.UpdatePatientDTO;
 import com.development.citasmedicas.domain.patient.dto.UpdatedPatientDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -23,30 +24,34 @@ public class PatientController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PatientResponseDTO>> getAllPatients() {
         List<PatientResponseDTO> patients = patientService.getAllPatients();
         return ResponseEntity.ok(patients);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable Long id) {
         PatientResponseDTO patient = patientService.getPatientById(id);
 
         return ResponseEntity.ok(patient);
     }
 
-    @PostMapping
-    public ResponseEntity<PatientResponseDTO> createPatient(@RequestBody @Valid CreatePatientDTO dto, UriComponentsBuilder uriBuilder) {
-        PatientResponseDTO patient = patientService.createPatient(dto);
-
-        URI url = uriBuilder.path("/api/patients/{id}")
-                .buildAndExpand(patient.id())
-                .toUri();
-
-        return ResponseEntity.created(url).body(patient);
-    }
+//    @PostMapping
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<PatientResponseDTO> createPatient(@RequestBody @Valid CreatePatientDTO dto, UriComponentsBuilder uriBuilder) {
+//        PatientResponseDTO patient = patientService.createPatient(dto);
+//
+//        URI url = uriBuilder.path("/api/patients/{id}")
+//                .buildAndExpand(patient.id())
+//                .toUri();
+//
+//        return ResponseEntity.created(url).body(patient);
+//    }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
         patientService.deletePatient(id);
 
@@ -54,6 +59,7 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UpdatedPatientDTO> updatePatient(@PathVariable Long id, @RequestBody UpdatePatientDTO dto) {
         var patient = patientService.updatePatient(id, dto);
 

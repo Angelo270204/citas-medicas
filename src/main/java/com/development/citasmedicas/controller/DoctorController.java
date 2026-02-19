@@ -6,6 +6,7 @@ import com.development.citasmedicas.domain.doctor.dto.DoctorResponseDTO;
 import com.development.citasmedicas.domain.doctor.dto.UpdateDoctorDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -21,18 +22,21 @@ public class DoctorController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<DoctorResponseDTO>> getAllDoctors() {
         var doctors = doctorService.getAllDoctors();
         return ResponseEntity.ok(doctors);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DoctorResponseDTO> getDoctorById(@PathVariable Long id) {
         var doctor = doctorService.getDoctorById(id);
         return ResponseEntity.ok(doctor);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DoctorResponseDTO> createDoctor(@RequestBody @Valid CreateDoctorDTO dto, UriComponentsBuilder uriBuilder) {
         DoctorResponseDTO doctor = doctorService.createDoctor(dto);
 
@@ -42,13 +46,15 @@ public class DoctorController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
 
         return ResponseEntity.noContent().build();
     }
 
-
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DoctorResponseDTO> updateDoctor(@PathVariable Long id, @RequestBody UpdateDoctorDTO dto) {
         DoctorResponseDTO doctor = doctorService.updateDoctor(id, dto);
 

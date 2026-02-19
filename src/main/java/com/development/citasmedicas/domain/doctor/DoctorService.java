@@ -6,8 +6,10 @@ import com.development.citasmedicas.domain.doctor.dto.UpdateDoctorDTO;
 import com.development.citasmedicas.domain.exception.NoDataToUpdateException;
 import com.development.citasmedicas.domain.user.Role;
 import com.development.citasmedicas.domain.user.User;
+import com.development.citasmedicas.domain.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +17,13 @@ import java.util.List;
 @Service
 public class DoctorService {
     private final DoctorRepository doctorRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
-    public DoctorService(DoctorRepository doctorRepository) {
+    public DoctorService(DoctorRepository doctorRepository, PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.doctorRepository = doctorRepository;
+        this.passwordEncoder=passwordEncoder;
+        this.userRepository=userRepository;
     }
 
     public List<DoctorResponseDTO> getAllDoctors() {
@@ -34,10 +40,12 @@ public class DoctorService {
 
     @Transactional
     public DoctorResponseDTO createDoctor(CreateDoctorDTO dto) {
-        User user = new User(dto.email(), dto.password(), Role.ROLE_DOCTOR);
+        if(userRepository.existsByEmail(dto.email())){
+            throw new IllegalArgumentException("El email ingresado ya existe");
+        }
 
+        User user = new User(dto.email(),passwordEncoder.encode(dto.password()), Role.ROLE_DOCTOR);
         Doctor doctor = new Doctor(dto.firstName(), dto.lastName(), dto.cmp(), dto.specialty(), user);
-
         doctorRepository.save(doctor);
 
         return new DoctorResponseDTO(doctor);
@@ -58,7 +66,23 @@ public class DoctorService {
             throw new NoDataToUpdateException("No hay ningun dato por modificar");
         }
 
-        doctor.updateDoctor(dto);
+        // Encriptar password si viene en el DTO
+        String encodedPassword = null;
+        if (dto.password() != null) {
+            encodedPassword = passwordEncoder.encode(dto.password());
+        }
+
+        // Crear nuevo DTO con password encriptado
+        UpdateDoctorDTO dtoWithEncodedPassword = new UpdateDoctorDTO(
+                dto.firstName(),
+                dto.lastName(),
+                dto.cmp(),
+                dto.specialty(),
+                dto.email(),
+                encodedPassword
+        );
+
+        doctor.updateDoctor(dtoWithEncodedPassword);
 
         return new DoctorResponseDTO(doctor);
     }

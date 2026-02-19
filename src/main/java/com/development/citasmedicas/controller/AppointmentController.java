@@ -5,6 +5,7 @@ import com.development.citasmedicas.domain.appointment.dto.AppointmentResponseDT
 import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -20,6 +21,7 @@ public class AppointmentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentResponseDTO>> getAllAppointments() {
         var appointments = service.getAllAppointments();
 
@@ -47,5 +49,15 @@ public class AppointmentController {
         service.cancelAppointment(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<AppointmentResponseDTO> completeAppointment(
+            @PathVariable Long id,
+            @RequestBody @Valid com.development.citasmedicas.domain.appointment.dto.CompleteAppointmentDTO dto) {
+        var appointment = service.completeAppointment(id, dto.diagnosis());
+
+        return ResponseEntity.ok(appointment);
     }
 }

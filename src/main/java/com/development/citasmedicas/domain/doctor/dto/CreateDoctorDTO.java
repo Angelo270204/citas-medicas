@@ -3,6 +3,8 @@ package com.development.citasmedicas.domain.doctor.dto;
 import com.development.citasmedicas.domain.doctor.Specialty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record CreateDoctorDTO(
         @NotBlank(message = "El nombre del medico es obligatorio")
@@ -15,7 +17,10 @@ public record CreateDoctorDTO(
         Specialty specialty,
         @NotBlank(message = "El correo electronico es obligatorio")
         String email,
-        @NotBlank(message = "La password es obligatoria")
+        @NotBlank(message = "La contraseña es obligatoria")
+        @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$",
+                message = "La contraseña debe contener letras y números")
         String password
 ) {
 }

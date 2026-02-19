@@ -11,7 +11,7 @@ import com.development.citasmedicas.domain.appointment.exception.InvalidBusiness
 import com.development.citasmedicas.domain.doctor.DoctorRepository;
 import com.development.citasmedicas.domain.patient.PatientRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -91,6 +91,24 @@ public class AppointmentService {
         }
 
         appointment.setStatus(AppointmentStatus.CANCELED);
+    }
+
+    @Transactional
+    public AppointmentResponseDTO completeAppointment(Long id, String diagnosis) {
+        var appointment = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("El id ingresado no existe"));
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELED) {
+            throw new InvalidAppointmentStatusException("No se puede completar una cita cancelada");
+        }
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new InvalidAppointmentStatusException("La cita ya está completada");
+        }
+
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointment.setDiagnosis(diagnosis);
+
+        return new AppointmentResponseDTO(appointment);
     }
 
     private void validateAppointmentTimeRange(LocalDateTime start, LocalDateTime end) {
