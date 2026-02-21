@@ -22,7 +22,6 @@ public class DoctorController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<DoctorResponseDTO>> getAllDoctors() {
         var doctors = doctorService.getAllDoctors();
         return ResponseEntity.ok(doctors);

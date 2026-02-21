@@ -1,17 +1,13 @@
 package com.development.citasmedicas.controller;
 
 import com.development.citasmedicas.domain.patient.PatientService;
-import com.development.citasmedicas.domain.patient.dto.CreatePatientDTO;
 import com.development.citasmedicas.domain.patient.dto.PatientResponseDTO;
 import com.development.citasmedicas.domain.patient.dto.UpdatePatientDTO;
 import com.development.citasmedicas.domain.patient.dto.UpdatedPatientDTO;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
