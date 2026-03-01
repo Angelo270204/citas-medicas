@@ -23,10 +23,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/doctors").permitAll()
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(req -> req.requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/doctors").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/appointments").permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -38,7 +38,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

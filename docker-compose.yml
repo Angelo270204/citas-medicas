@@ -11,8 +11,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "3306:3306"
     volumes:
       # Persistir datos de la BD (¡IMPORTANTE! Los datos no se pierden al reiniciar)
       - mysql_data:/var/lib/mysql
