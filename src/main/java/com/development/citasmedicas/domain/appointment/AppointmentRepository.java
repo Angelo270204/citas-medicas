@@ -39,6 +39,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Para ver el historial de un paciente
     List<Appointment> findByPatientId(Long patientId);
 
+    // Para ver todas las citas de un doctor
+    List<Appointment> findByDoctorId(Long doctorId);
+
     // Para ver la agenda del médico en un rango (ej: citas de hoy)
     List<Appointment> findByDoctorIdAndStartDateTimeBetween(
         Long doctorId, LocalDateTime start, LocalDateTime end

@@ -3,6 +3,7 @@ package com.development.citasmedicas.domain.appointment;
 import com.development.citasmedicas.domain.appointment.dto.AppointmentAdminResponseDTO;
 import com.development.citasmedicas.domain.appointment.dto.AppointmentResponseDTO;
 import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentDTO;
+import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentPatientDTO;
 import com.development.citasmedicas.domain.appointment.exception.AppointmentConflictException;
 import com.development.citasmedicas.domain.appointment.exception.InvalidAppointmentDurationException;
 import com.development.citasmedicas.domain.appointment.exception.InvalidAppointmentStatusException;
@@ -50,6 +51,26 @@ public class AppointmentService {
                 .toList();
     }
 
+    public List<AppointmentResponseDTO> getAppointmentsByPatientEmail(String email) {
+        var patient = patientRepository.findByUserEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado"));
+        
+        return repository.findByPatientId(patient.getId())
+                .stream()
+                .map(AppointmentResponseDTO::new)
+                .toList();
+    }
+
+    public List<AppointmentResponseDTO> getAppointmentsByDoctorEmail(String email) {
+        var doctor = doctorRepository.findByUserEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Doctor no encontrado"));
+        
+        return repository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(AppointmentResponseDTO::new)
+                .toList();
+    }
+
     public AppointmentResponseDTO getAppointmentById(Long id) {
         var appointment = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("El id ingresado no existe"));
 
@@ -76,6 +97,22 @@ public class AppointmentService {
         var appointment = new Appointment(app, doctor, patient);
 
         return new AppointmentResponseDTO(repository.save(appointment));
+    }
+
+    @Transactional
+    public AppointmentResponseDTO scheduledAppointmentForPatient(ScheduleAppointmentPatientDTO dto, String email) {
+        var patient = patientRepository.findByUserEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado"));
+
+        var fullDto = new ScheduleAppointmentDTO(
+                dto.startDateTime(),
+                dto.endDateTime(),
+                dto.reasonForVisit(),
+                dto.doctorId(),
+                patient.getId()
+        );
+
+        return scheduledAppointment(fullDto);
     }
 
     @Transactional

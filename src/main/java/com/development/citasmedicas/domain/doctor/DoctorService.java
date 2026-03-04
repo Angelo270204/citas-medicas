@@ -1,6 +1,7 @@
 package com.development.citasmedicas.domain.doctor;
 
 import com.development.citasmedicas.domain.doctor.dto.CreateDoctorDTO;
+import com.development.citasmedicas.domain.doctor.dto.DoctorAdminResponseDTO;
 import com.development.citasmedicas.domain.doctor.dto.DoctorResponseDTO;
 import com.development.citasmedicas.domain.doctor.dto.UpdateDoctorDTO;
 import com.development.citasmedicas.domain.exception.NoDataToUpdateException;
@@ -29,13 +30,26 @@ public class DoctorService {
     public List<DoctorResponseDTO> getAllDoctors() {
         return doctorRepository.findAll()
                 .stream()
+                .filter(doctor -> doctor.getUser().isEnable())
                 .map(DoctorResponseDTO::new)
+                .toList();
+    }
+
+    public List<DoctorAdminResponseDTO> getAllDoctorsForAdmin() {
+        return doctorRepository.findAll()
+                .stream()
+                .map(DoctorAdminResponseDTO::new)
                 .toList();
     }
 
     public DoctorResponseDTO getDoctorById(Long id) {
         var doctor = doctorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("El id ingresado no existe"));
         return new DoctorResponseDTO(doctor);
+    }
+
+    public DoctorAdminResponseDTO getDoctorByIdForAdmin(Long id) {
+        var doctor = doctorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("El id ingresado no existe"));
+        return new DoctorAdminResponseDTO(doctor);
     }
 
     @Transactional

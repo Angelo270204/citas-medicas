@@ -2,6 +2,7 @@ package com.development.citasmedicas.controller;
 
 import com.development.citasmedicas.domain.doctor.DoctorService;
 import com.development.citasmedicas.domain.doctor.dto.CreateDoctorDTO;
+import com.development.citasmedicas.domain.doctor.dto.DoctorAdminResponseDTO;
 import com.development.citasmedicas.domain.doctor.dto.DoctorResponseDTO;
 import com.development.citasmedicas.domain.doctor.dto.UpdateDoctorDTO;
 import jakarta.validation.Valid;
@@ -27,10 +28,23 @@ public class DoctorController {
         return ResponseEntity.ok(doctors);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<DoctorAdminResponseDTO>> getAllDoctorsForAdmin() {
+        var doctors = doctorService.getAllDoctorsForAdmin();
+        return ResponseEntity.ok(doctors);
+    }
+
+    @GetMapping("/{id}")
     public ResponseEntity<DoctorResponseDTO> getDoctorById(@PathVariable Long id) {
         var doctor = doctorService.getDoctorById(id);
+        return ResponseEntity.ok(doctor);
+    }
+
+    @GetMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DoctorAdminResponseDTO> getDoctorByIdForAdmin(@PathVariable Long id) {
+        var doctor = doctorService.getDoctorByIdForAdmin(id);
         return ResponseEntity.ok(doctor);
     }
 
