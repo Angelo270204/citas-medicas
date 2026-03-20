@@ -2,8 +2,10 @@ package com.development.citasmedicas.domain.appointment;
 
 import com.development.citasmedicas.domain.appointment.dto.AppointmentAdminResponseDTO;
 import com.development.citasmedicas.domain.appointment.dto.AppointmentResponseDTO;
+import com.development.citasmedicas.domain.appointment.dto.AvailableSlotsResponseDTO;
 import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentDTO;
 import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentPatientDTO;
+import com.development.citasmedicas.domain.appointment.dto.TimeSlotDTO;
 import com.development.citasmedicas.domain.appointment.exception.AppointmentConflictException;
 import com.development.citasmedicas.domain.appointment.exception.InvalidAppointmentDurationException;
 import com.development.citasmedicas.domain.appointment.exception.InvalidAppointmentStatusException;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,6 +35,7 @@ public class AppointmentService {
     private static final int MAX_APPOINTMENT_HOURS = 1;
     private static final int BUSINESS_START_HOUR = 8;
     private static final int BUSINESS_END_HOUR = 18;
+    private static final int SLOT_DURATION_MINUTES = 30;
 
     public AppointmentService(AppointmentRepository repository, DoctorRepository doctorRepository, PatientRepository patientRepository) {
         this.repository = repository;
@@ -179,5 +185,52 @@ public class AppointmentService {
         if (startHour < BUSINESS_START_HOUR || endHour > BUSINESS_END_HOUR || (endHour == BUSINESS_END_HOUR && end.getMinute() > 0)) {
             throw new InvalidBusinessHoursException("Las citas solo pueden agendarse entre las " + BUSINESS_START_HOUR + ":00 y las " + BUSINESS_END_HOUR + ":00");
         }
+    }
+
+    public AvailableSlotsResponseDTO getAvailableSlots(Long doctorId, LocalDate date) {
+        var doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new EntityNotFoundException("Doctor no encontrado"));
+
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            return new AvailableSlotsResponseDTO(
+                    doctorId,
+                    doctor.getFirstName() + " " + doctor.getLastName(),
+                    date,
+                    List.of()
+            );
+        }
+
+        List<Appointment> appointmentsOnDate = repository.findByDoctorIdAndDate(doctorId, date);
+
+        List<TimeSlotDTO> slots = new ArrayList<>();
+        LocalTime currentTime = LocalTime.of(BUSINESS_START_HOUR, 0);
+        LocalTime endTime = LocalTime.of(BUSINESS_END_HOUR, 0);
+
+        while (currentTime.isBefore(endTime)) {
+            LocalTime slotEnd = currentTime.plusMinutes(SLOT_DURATION_MINUTES);
+            
+            LocalDateTime slotStart = LocalDateTime.of(date, currentTime);
+            LocalDateTime slotEndDateTime = LocalDateTime.of(date, slotEnd);
+
+            boolean isAvailable = appointmentsOnDate.stream()
+                    .noneMatch(app -> app.getStatus() != AppointmentStatus.CANCELED &&
+                            isOverlapping(slotStart, slotEndDateTime, app.getStartDateTime(), app.getEndDateTime()));
+
+            slots.add(new TimeSlotDTO(currentTime, slotEnd, isAvailable));
+            currentTime = slotEnd;
+        }
+
+        return new AvailableSlotsResponseDTO(
+                doctorId,
+                doctor.getFirstName() + " " + doctor.getLastName(),
+                date,
+                slots
+        );
+    }
+
+    private boolean isOverlapping(LocalDateTime start1, LocalDateTime end1, 
+                                   LocalDateTime start2, LocalDateTime end2) {
+        return start1.isBefore(end2) && start2.isBefore(end1);
     }
 }

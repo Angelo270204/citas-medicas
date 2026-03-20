@@ -2,15 +2,18 @@ package com.development.citasmedicas.controller;
 
 import com.development.citasmedicas.domain.appointment.AppointmentService;
 import com.development.citasmedicas.domain.appointment.dto.AppointmentResponseDTO;
+import com.development.citasmedicas.domain.appointment.dto.AvailableSlotsResponseDTO;
 import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentDTO;
 import com.development.citasmedicas.domain.appointment.dto.ScheduleAppointmentPatientDTO;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,6 +23,15 @@ public class AppointmentController {
 
     public AppointmentController(AppointmentService service) {
         this.service = service;
+    }
+
+    @GetMapping("/available-slots")
+    public ResponseEntity<AvailableSlotsResponseDTO> getAvailableSlots(
+            @RequestParam Long doctorId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        
+        var slots = service.getAvailableSlots(doctorId, date);
+        return ResponseEntity.ok(slots);
     }
 
     @GetMapping

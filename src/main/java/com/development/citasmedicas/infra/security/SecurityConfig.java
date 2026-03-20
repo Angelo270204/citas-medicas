@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> req.requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/doctors").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/doctors/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/available-slots").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

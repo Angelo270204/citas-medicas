@@ -70,9 +70,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-
-        // No aplicar filtro a estas rutas
-        return path.startsWith("/api/auth/") ||
-                (path.equals("/api/doctors") && request.getMethod().equals("GET"));
+         return path.startsWith("/api/auth/");
     }
 }

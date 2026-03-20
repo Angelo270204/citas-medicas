@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,5 +46,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Para ver la agenda del médico en un rango (ej: citas de hoy)
     List<Appointment> findByDoctorIdAndStartDateTimeBetween(
         Long doctorId, LocalDateTime start, LocalDateTime end
+    );
+
+    @Query("""
+        SELECT a FROM Appointment a
+        WHERE a.doctor.id = :doctorId
+        AND CAST(a.startDateTime AS date) = :date
+        ORDER BY a.startDateTime
+    """)
+    List<Appointment> findByDoctorIdAndDate(
+        @Param("doctorId") Long doctorId,
+        @Param("date") LocalDate date
     );
 }
