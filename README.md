@@ -8,6 +8,7 @@ Sistema de gestión de citas médicas desarrollado con **Spring Boot 4.0** y **J
 - **Gestión de Doctores**: CRUD completo con especialidades médicas
 - **Gestión de Pacientes**: Registro y administración de pacientes
 - **Sistema de Citas**: Agendamiento con validaciones de horarios y conflictos
+- **Horarios Disponibles**: Endpoint para consultar slots de 30 minutos disponibles por doctor
 - **Roles y Permisos**: Control de acceso basado en roles (ADMIN, DOCTOR, PATIENT)
 - **CORS Configurado**: Soporte para frontend en localhost:4200
 - **Migraciones de BD**: Flyway para versionamiento de esquema
@@ -26,6 +27,14 @@ Sistema de gestión de citas médicas desarrollado con **Spring Boot 4.0** y **J
 | JWT (jjwt) | 0.13.0 |
 | Lombok | Incluido |
 | Docker | 3.8+ |
+
+### Testing
+
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| JUnit | 5 (Jupiter) | Framework de testing |
+| Mockito | 5.x | Mocking y verificación |
+| Spring Boot Test | Incluido | Testing de integración |
 
 ## 🏗️ Arquitectura
 
@@ -128,6 +137,7 @@ java -jar target/citas-medicas-0.0.1-SNAPSHOT.jar
 
 | Método | Endpoint | Descripción | Acceso |
 |--------|----------|-------------|--------|
+| GET | `/api/appointments/available-slots` | Obtener horarios disponibles de un doctor | Público |
 | GET | `/api/appointments` | Mis citas (paciente o doctor) | PATIENT/DOCTOR |
 | GET | `/api/appointments/all` | Listar todas las citas | ADMIN |
 | GET | `/api/appointments/{id}` | Obtener cita por ID | Autenticado |
@@ -137,6 +147,40 @@ java -jar target/citas-medicas-0.0.1-SNAPSHOT.jar
 | PATCH | `/api/appointments/{id}/complete` | Completar cita con diagnóstico | DOCTOR |
 
 ## 📝 Ejemplos de Uso
+
+### Consultar Horarios Disponibles
+
+```bash
+# Obtener slots disponibles de un doctor en una fecha específica
+curl -X GET "http://localhost:8080/api/appointments/available-slots?doctorId=1&date=2026-03-10"
+```
+
+**Respuesta:**
+```json
+{
+  "doctorId": 1,
+  "doctorName": "Juan Pérez",
+  "date": "2026-03-10",
+  "slots": [
+    {
+      "startTime": "08:00",
+      "endTime": "08:30",
+      "available": true
+    },
+    {
+      "startTime": "08:30",
+      "endTime": "09:00",
+      "available": false
+    },
+    {
+      "startTime": "09:00",
+      "endTime": "09:30",
+      "available": true
+    }
+    // ... más slots hasta las 18:00
+  ]
+}
+```
 
 ### Login
 
@@ -224,9 +268,11 @@ curl -X GET http://localhost:8080/api/appointments \
 ## 📅 Reglas de Negocio para Citas
 
 - **Horario laboral**: Lunes a Viernes, 8:00 AM - 6:00 PM
+- **Slots de tiempo**: Intervalos de 30 minutos
 - **Duración mínima**: 30 minutos
 - **Duración máxima**: 1 hora
 - **Sin conflictos**: Un doctor/paciente no puede tener citas solapadas
+- **Estados**: SCHEDULED, COMPLETED, CANCELED
 
 ## 🔐 Roles
 
@@ -255,6 +301,81 @@ appointments   # Citas (fecha, estado, diagnóstico)
 ### Volúmenes
 
 - `mysql_data`: Persistencia de datos de MySQL
+
+## 🧪 Testing
+
+El proyecto incluye **tests unitarios** utilizando **JUnit 5** y **Mockito** para garantizar la calidad del código.
+
+### Estructura de Tests
+
+```
+src/test/java/com/development/citasmedicas/
+├── patient/
+│   └── PatientServiceTest.java    # Tests completos de PatientService
+└── (más servicios en desarrollo)
+```
+
+### Ejecutar Tests
+
+```bash
+# Ejecutar todos los tests
+./mvnw test
+
+# Ejecutar tests de un servicio específico
+./mvnw test -Dtest=PatientServiceTest
+
+# Ejecutar con reporte de cobertura
+./mvnw test jacoco:report
+```
+
+### Cobertura Actual
+
+| Servicio | Tests | Cobertura |
+|----------|-------|-----------|
+| PatientService | 12 tests | ✅ 100% |
+| DoctorService | - | 🔄 Pendiente |
+| AppointmentService | - | 🔄 Pendiente |
+
+### Tests Implementados en PatientService
+
+**Métodos testeados:**
+- ✅ `getAllPatients()` - Casos con datos y lista vacía
+- ✅ `getPatientById()` - Caso exitoso y excepción cuando no existe
+- ✅ `createPatient()` - Creación exitosa con encriptación y validación de email duplicado
+- ✅ `deletePatient()` - Soft delete exitoso y validación de ID
+- ✅ `updatePatient()` - Actualización completa, parcial, sin datos, y validación de ID
+
+**Técnicas utilizadas:**
+- **Mocking** de dependencias (Repository, PasswordEncoder, UserRepository)
+- **Verificación** de llamadas a métodos con `verify()`
+- **ArgumentMatchers** para validaciones genéricas (`any()`, `anyString()`)
+- **Patrón AAA** (Arrange-Act-Assert) en todos los tests
+- **Testing de excepciones** con `assertThrows()`
+
+### Ejemplo de Test
+
+```java
+@Test
+@DisplayName("Debe crear un paciente exitosamente con password encriptado")
+void createPatientSuccessfully() {
+    // ARRANGE
+    CreatePatientDTO dto = new CreatePatientDTO(/* ... */);
+    when(userRepository.existsByEmail(dto.email())).thenReturn(false);
+    when(passwordEncoder.encode(dto.password())).thenReturn("encrypted");
+    when(patientRepository.save(any(Patient.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // ACT
+    PatientResponseDTO result = patientService.createPatient(dto);
+
+    // ASSERT
+    assertNotNull(result);
+    assertEquals("Carlos", result.firstName());
+    verify(userRepository).existsByEmail(dto.email());
+    verify(passwordEncoder).encode(dto.password());
+    verify(patientRepository).save(any(Patient.class));
+}
+```
 
 ## 📄 Licencia
 
