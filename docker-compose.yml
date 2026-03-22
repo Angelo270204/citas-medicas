@@ -35,6 +35,8 @@ services:
       - .env
     environment:
       DB_URL: jdbc:mysql://mysql:3306/citas_medicas?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    ports:
+      - "127.0.0.1:8080:8080"  # 🔥 CLAVE
     networks:
       - app-network
 
