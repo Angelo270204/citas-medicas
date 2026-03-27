@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Definir colores para consola (desarrollo) -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
+    <!-- Patrón de log para desarrollo (con colores) -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    
+    <!-- Patrón de log para producción (sin colores) -->
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- Appender para consola -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Configuración para perfil de desarrollo -->
+    <springProfile name="dev,default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+        
+        <!-- Logging detallado para nuestra aplicación en desarrollo -->
+        <logger name="com.development.citasmedicas" level="DEBUG" />
+        
+        <!-- Logging específico para JWT en desarrollo (ver todos los detalles) -->
+        <logger name="com.development.citasmedicas.infra.security.JwtAuthorizationFilter" level="DEBUG" />
+        
+        <!-- Reducir ruido de frameworks -->
+        <logger name="org.springframework" level="INFO" />
+        <logger name="org.hibernate" level="WARN" />
+        <logger name="org.flywaydb" level="INFO" />
+    </springProfile>
+
+    <!-- Configuración para perfil de producción -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+        
+        <!-- En producción: solo logs importantes de nuestra app -->
+        <logger name="com.development.citasmedicas" level="INFO" />
+        
+        <!-- JWT en producción: INFO para autenticaciones + WARN para errores -->
+        <logger name="com.development.citasmedicas.infra.security.JwtAuthorizationFilter" level="INFO" />
+        
+        <!-- Frameworks en producción: solo errores -->
+        <logger name="org.springframework" level="WARN" />
+        <logger name="org.hibernate" level="ERROR" />
+        <logger name="org.flywaydb" level="WARN" />
+    </springProfile>
+
+</configuration>
